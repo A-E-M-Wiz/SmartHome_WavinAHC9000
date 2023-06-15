@@ -1,29 +1,50 @@
 # Wavin-AHC-9000-mqtt
-This is a simple Esp8266 mqtt interface for Wavin AHC-9000/Jablotron AC-116, with the goal of being able to control this heating controller from a home automation system.
+This is a MQTT interface for Wavin AHC-9000 developed for the ESP8266, with the goal of being able to control this heating controller from a home automation system.
 
 ## Hardware
 The AHC-9000 uses modbus to communicate over a half duplex RS422 connection. It has two RJ45 connectors for this purpose, which can both be used. 
-The following schematic shows how to connect an Esp8266 to the AHC-9000:
+<BR>
+The following schematic shows how to connect an ESP8266 to the AHC-9000:
+<br>
+
 ![Schematic](/electronics/schematic.png)
 
 Components with links to devices on eBay
-* Esp8266. I use a [NodeMcu 0.9](https://www.ebay.com/itm/NEW-Version-NodeMcu-Lua-ESP8266-CH340-WIFI-Internet-Development-Board-Module/311413475392?epid=502141093&hash=item4881b08840:g:-IEAAOSw-YVXldDM), mostly because it is very convenient to have the onboard USB interface for programming. Almost anything with an Esp8266 on it will work.
-* [24V to 3v3 switchmode converter](https://www.ebay.com/itm/DC-Buck-24V-12V-9V-to-3-3V-3A-Step-Down-Converter-Voltage-Regulator-Power-Module/173494900654?hash=item28651a17ae:g:688AAOSwL1hbgY62). This is only needed if you want to power the Esp8266 from the AHC-9000. A 24V to 5V converter can also be used, if it is connected to the +5V input of the NodeMcu. Please note that not all 3V3 step down converters on eBay supports 24V input
-* [MAX3072E](https://www.maximintegrated.com/en/products/interface/transceivers/MAX3072E.html) for converting the 3V3 serial output from the Esp8266 to RS422. There are many similar IC's from other suppliers, which can also be used. Speed is limited, and cables can be kept short, so this is rather uncritical. Note though, that it should be a 3V3 version. [MAX3485](https://www.ebay.com/itm/5pcs-MAX3485CPA-DIP-DIP-8-MAX3485-3-3V-Powered-Transceiver-new/400985402735?hash=item5d5c97ad6f:g:WS4AAOSwGvhT43se) should be compatible, and can be found on eBay.
-* RJ45 connector. This can be omitted by soldering a patch cable directly to the circuit.
+* ESP8266.
+  <br> [NodeMCU Lua Amica V2 ESP8266 ESP12F Module CP2102 WiFi IoT Unsoldered Arduino DIY](https://www.ebay.de/itm/143790404692 )
+* 24V to 3v3 switchmode converter
+  <br> [DC-DC 3V 5V 12V 24V 36V 48V Buck Adjustable Step Down Voltage Converter Module](https://www.ebay.de/itm/272806096268).
+* RS422 to TTL converter
+  <br> [MAX3485 TTL to RS485 UART Converter Serial Adapter Module 3.3V-5V for Node](https://www.ebay.de/itm/185483701909)
 
-Depending on the used Esp8266 board and/or the switchmode converter used, it may be benificial to add a larger capacitor in the range of 100uF between 3V3 and gnd.  This will most likely help if you experience WiFi connection/stability issues.
+<br>
 
 ## Software
+
+### Setup
+Install Visual Studio Code, and install Platform.IO plugin.
+<br>
+Install [USB driver CP210x USB to UART](https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers) from Silicon Labs. Once downloaded, right click on ````silabser.inf```` and select Install. Plug in the ESP8266 using USB, and dobbelcheck in Device Manager that the devices shows up under Ports (COM & LPT) and is listed as ````Silicon Labs CP210x USB to UART Bridge (COMX)````.
+
+<br>
+
+### Bootloader mode
+The ESP8266 will enter the serial bootloader when GPIO0 is held low on reset. Otherwise it will run the program in flash. <br>
+The Flash BTN on the NodeMCU board pulls GPIO0 low when pressed. However, the automatic bootloader will automatically set the device into Firmware Download Mode when flashing the board through the USB interface. As such, there should be no need to press the Flash BTN. For more info, refer to the [official docs](https://docs.espressif.com/projects/esptool/en/latest/esp8266/advanced-topics/boot-mode-selection.html). <br>
+In fact, the Flash BTN can be used as an Input BTN. Set ````pinMode(0, INPUT_PULLUP)```` and you will read LOW if the button is pressed.
+
+<br>
 
 ### Configuration
 src/PrivateConfig.h contains 5 constants, that should be changed to fit your own setup.
 
 `WIFI_SSID`, `WIFI_PASS`, `MQTT_SERVER`, `MQTT_USER`, and `MQTT_PASS`.
 
+<br>
+
 ### Compiling
-I use [PlatformIO](https://platformio.org/) for compiling, uploading, and and maintaining dependencies for my code. If you install PlatformIO in a supported editor, building this project is quite simple. Just open the directory containing `platformio.ini` from this project, and click build/upload. If you use a different board than nodemcu, remember to change the `board` variable in `platformio.ini`.
-You may be able to use the Arduino tools with the esp8266 additions for compiling, but a few changes may be needed, including downloading dependencies manually.
+Using Visual Studio Code, open the directory containing `platformio.ini` from this project, and click build/upload. If you use a different board than nodemcu, remember to change the `board` variable in `platformio.ini`.
+
 
 ### Testing
 Assuming you have a working mqtt server setup, you should now be able to control your AHC-9000 using mqtt. If you have the [Mosquitto](https://mosquitto.org/) mqtt tools installed on your mqtt server, you can execude:
