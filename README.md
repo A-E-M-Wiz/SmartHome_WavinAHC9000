@@ -5,7 +5,7 @@ This is a MQTT interface for Wavin AHC-9000 developed for the ESP8266, with the 
 
 
 
-# Hardware
+## Hardware
 The AHC-9000 uses modbus to communicate over a half duplex RS422 connection. It has two RJ45 connectors for this purpose, which can both be used. 
 <BR>
 The following schematic shows how to connect an ESP8266 to the AHC-9000:
@@ -23,14 +23,14 @@ Components with links to devices on eBay
 
 <br>
 
-## ESP8266 pinout
+### ESP8266 pinout
 Pinout diagram of the NodeMCU ESP8266.
 
 ![8266 Pin-out](/electronics/8266pinout.png)
 
 <br>
 
-## Supply voltage
+### Supply voltage
 Note that the 8266 has three different options for powering the board.
 - USB power supply
 - 5 to 12 VDC using Vin pin
@@ -40,7 +40,7 @@ Since we are using a voltage converter, we will be feeding the 3.3 VDC pin direc
 
 <br>
 
-## UART
+### UART
 Although there are two UARTs(0 and 1) available to NodeMCU, UART 1 is not capable of receiving data and is therefore transmit only.
 - UART0 is mapped to pins GPIO1 (TX) and GPIO3 (RX), with the option to remap to GPIO15 (TX) and GPIO13 (RX). 
 - UART1 is mapped to GPIO2 (TX).
@@ -54,7 +54,7 @@ Refer to more documentation:
 
 <br>
 
-## Final design
+### Final design
 The final design can look something like this:
 
 ![Final](/electronics/20230629_213530-small.jpg)
@@ -63,47 +63,47 @@ The final design can look something like this:
 
 
 
-# Software
+## Software
 
-## Setup
+### Setup
 Install Visual Studio Code, and install Platform.IO plugin.
 <br>
 Install [USB driver CP210x USB to UART](https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers) from Silicon Labs. Once downloaded, right click on ````silabser.inf```` and select Install. Plug in the ESP8266 using USB, and dobbelcheck in Device Manager that the devices shows up under Ports (COM & LPT) and is listed as ````Silicon Labs CP210x USB to UART Bridge (COMX)````.
 
 <br>
 
-## Bootloader mode
+### Bootloader mode
 The ESP8266 will enter the serial bootloader when GPIO0 is held low on reset. Otherwise it will run the program in flash. <br>
 The Flash BTN on the NodeMCU board pulls GPIO0 low when pressed. However, the automatic bootloader will automatically set the device into Firmware Download Mode when flashing the board through the USB interface. As such, there should be no need to press the Flash BTN. For more info, refer to the [official docs](https://docs.espressif.com/projects/esptool/en/latest/esp8266/advanced-topics/boot-mode-selection.html). <br>
 In fact, the Flash BTN can be used as an Input BTN. Set ````pinMode(0, INPUT_PULLUP)```` and you will read LOW if the button is pressed.
 
 <br>
 
-## Configuration
+### Configuration
 src/PrivateConfig.h contains 5 constants, that should be changed to fit your own setup.
 
 `WIFI_SSID`, `WIFI_PASS`, `MQTT_SERVER`, `MQTT_USER`, and `MQTT_PASS`.
 
 <br>
 
-## Compiling
+### Compiling
 Using Visual Studio Code, open the directory containing `platformio.ini` from this project, and click build/upload. If you use a different board than nodemcu, remember to change the `board` variable in `platformio.ini`.
 
 <br>
 
 
 
-# Testing
+## Testing
 Assuming you have a working MQTT broker setup, you should now be able to control your AHC-9000 using MQTT. 
 
 <br>
 
-## MQTT Broker Setup
+### MQTT Broker Setup
 You can have the MQTT broker running in your Home Assistance. Refer to the official documentation [Home Assistant Add-on: Mosquitto broker](https://github.com/home-assistant/addons/blob/master/mosquitto/DOCS.md).
 
 <br>
 
-## Test with MQTTX App
+### Test with MQTTX App
 Download and install [MQTTX App](https://mqttx.app/), and subscripe to topic `heat/#`. Then plug in your device to the Wavin system. You should now see data comming in.
 
 ![Final](/doc/Mqtt_GetData.png)
@@ -118,7 +118,7 @@ Yah! Test successful.
 
 
 
-# Integration with HomeAssistant
+## Integration with HomeAssistant
 If you have a working mqtt setup in [HomeAssistant](https://home-assistant.io/), all you need to do in order to control your heating from HomeAssistant is to enable auto discovery for mqtt in your `configuration.yaml` ([How to make changes in HA configuration file](https://www.home-assistant.io/getting-started/configuration/)).
 
 ```
@@ -160,7 +160,7 @@ sensor wavinBattery:
 
 <br>
 
-## Dashboard
+### Dashboard
 And finally; Ohoi sailor :-D
 
 ![Final](/doc/HA_data.png)
